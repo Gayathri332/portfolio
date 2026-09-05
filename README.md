@@ -1,9 +1,12 @@
 # Gayathri Shettigar — Portfolio
 
 A single-server portfolio: a static frontend (vanilla HTML/CSS/JS, no build step) served by
-an Express backend, with MongoDB storing your **projects** and **contact messages**. The
-"Projects" section is pulled live from the database, so you can add new projects later without
-touching the code or redeploying.
+an Express backend, with MongoDB storing your **projects**, **certificates**, and **contact
+messages**. The "Projects" section is pulled live from the database, so you can add new
+projects later without touching the code or redeploying. It also includes an AI-powered
+**"Ask about Gayathri"** assistant that answers visitor questions using real content from your
+resume, About page, certificates, and GitHub — see [section 5](#5-the-ask-about-gayathri-assistant)
+for exactly what powers it and how it works.
 
 ## Design
 
@@ -56,7 +59,7 @@ Any project without an `image` field keeps showing its placeholder automatically
 
 ## Adding your photo
 
-Drop a photo in as `public/assets/profile1.jpg` (a square-ish, well-lit photo works best — it's
+Drop a photo in as `public/assets/profile.jpg` (a square-ish, well-lit photo works best — it's
 used both as a small round avatar in the hero and a larger card in the About section). Until
 you add one, both spots show a clean "GS" placeholder automatically — nothing looks broken in
 the meantime, so you can ship this now and drop the photo in whenever you have one ready.
@@ -65,6 +68,8 @@ the meantime, so you can ship this now and drop the photo in whenever you have o
 
 - [Node.js](https://nodejs.org) 18+
 - A MongoDB database — easiest is a free [MongoDB Atlas](https://www.mongodb.com/cloud/atlas/register) cluster (or run MongoDB locally)
+- A free [Cohere API key](https://dashboard.cohere.com/api-keys) if you want the AI assistant
+  (section 5) to actually understand and answer questions — everything else works without it
 
 ## 2. Setup
 
@@ -78,6 +83,7 @@ Open `.env` and fill in:
 - `MONGODB_URI` — your Atlas (or local) connection string
 - `ADMIN_KEY` — any secret string you make up yourself (used to add projects / read messages)
 - `PORT` — leave as 5000 unless it's taken
+- `COHERE_API_KEY`, `GITHUB_USERNAME`, `GITHUB_TOKEN` — optional, see section 5
 
 ## 3. Seed your starter projects
 
@@ -85,9 +91,9 @@ Open `.env` and fill in:
 npm run seed
 ```
 
-This inserts the 4 starter projects (LLM File Assistant, Smart Speed Breaker, Health
-Monitoring System, Shopnest) into MongoDB. Edit the `projects` array in `seed.js` any time
-and re-run `npm run seed` to reset them, or add new ones live (see below) once it's running.
+This inserts the starter projects, certificates, and profile info into MongoDB. Edit the
+arrays in `seed.js` any time and re-run `npm run seed` to reset them, or add new ones live
+(see section 9) once it's running.
 
 ## 4. Run it
 
@@ -99,34 +105,88 @@ npm start
 
 Visit **http://localhost:5000**.
 
-## 5. The "Ask about Gayathri" chat widget
+## 5. The "Ask about Gayathri" assistant
 
-**It works with zero setup** — without any AI key, it answers using the keyword facts seeded
-by `npm run seed` (things like "what does she do", "what has she built", "how do I contact
-her"). This is the fallback path, used if `COHERE_API_KEY` isn't set or a Cohere call fails.
+The floating chat bubble on the site lets visitors ask questions like *"what has she built?"*
+or *"does she know cooking?"* and get a real answer grounded in your actual content — not a
+generic chatbot bolted on top.
 
-**With a Cohere key set, it does real semantic search + GitHub lookups instead of keyword
-matching.** A separate build step reads everything about you — the resume PDF, the actual text
-of `about.html` (bio, "what I'm doing now", every "off the clock" card), certificates and
-projects from the database, and your public GitHub repos (description + README) — splits it
-into chunks, embeds each chunk with Cohere, and stores it in a `KnowledgeChunk` collection.
-When a visitor asks something, the widget embeds their question, finds the most relevant
-chunks by cosine similarity, and hands only those to Cohere as context — so it isn't limited to
-whatever fits in one hand-written paragraph, and questions about things you only mentioned on
-the About page (hobbies, etc.) actually get answered instead of hitting the "I don't have that"
-fallback.
+### What's under the hood
 
-On top of that, the model has a live tool, `get_github_repo_details`, that it can call mid-answer
-to pull a specific repo's live description and README — so it can go beyond the resume for "what
-did she actually do in that project" questions, even for details you never wrote down anywhere
-on the site.
+| Piece | What it does |
+|---|---|
+| **LLM (chat)** | [Cohere](https://cohere.com) `command-a-03-2025` — generates the final answer, and decides when to call the GitHub tool. Configurable via `COHERE_MODEL` in `.env`. |
+| **Embedding model** | Cohere `embed-english-v3.0` — turns text into vectors for semantic search. Configurable via `COHERE_EMBED_MODEL`. |
+| **Vector storage** | A `KnowledgeChunk` collection in your existing MongoDB — no separate vector database needed at this scale. |
+| **Retrieval method** | Cosine similarity, computed in plain JavaScript over the (small) chunk set — same retrieval idea as your Resume Intelligence project, just without a dedicated FAISS index since the dataset here is small enough not to need one. |
+| **Live tool** | A GitHub REST API lookup (`get_github_repo_details`) the model can call mid-answer, for project details that live in code, not the resume. |
+| **Fallback** | The original keyword-matched `facts` list — used automatically if `COHERE_API_KEY` isn't set, or if any Cohere call fails. |
 
-**Setup:**
+### How it works, step by step
+
+**Offline — `npm run build-kb` (run this once, and again any time your content changes):**
+1. Extracts text from your resume PDF (`pdf-parse`).
+2. Extracts the actual visible text of `about.html` — bio, "what I'm doing now", every
+   "off the clock" card like hobbies — using `cheerio` to read the real HTML, so anything you
+   write there is automatically included.
+3. Pulls certificates and projects straight from MongoDB.
+4. Fetches your public GitHub repos and their READMEs via the GitHub API.
+5. Splits all of that into ~900-character chunks, embeds each one with Cohere's embed
+   endpoint, and stores `{ text, source, embedding }` in the `KnowledgeChunk` collection —
+   replacing whatever was stored before.
+
+**Live — every time a visitor asks a question (`routes/chat.js`):**
+1. The question itself gets embedded with the same Cohere embed model.
+2. That vector is compared (cosine similarity) against every stored chunk; the top ~6 most
+   relevant ones are pulled out, and anything too weak a match to be useful is dropped — this
+   is the semantic search step, so it matches on *meaning*, not keywords. It's why "does she
+   know cooking?" now works even though the word "cooking" is never in the resume — it's in the
+   About page chunk, and the embeddings recognize the question and that chunk are about the
+   same thing.
+3. Those chunks are handed to Cohere's chat endpoint as context, along with the question and a
+   system prompt instructing it to answer only from that context (or say it doesn't know,
+   rather than invent something).
+4. If the question is about a specific project's implementation and the retrieved context
+   doesn't fully cover it, the model can call the `get_github_repo_details` tool itself — the
+   backend matches the project name against your live repo list, fetches that repo's
+   description + README from GitHub in real time, feeds it back to the model, and the model
+   answers using it. This is genuine function calling (Cohere's tool-use API), not a hardcoded
+   lookup — the model decides on its own whether it needs it.
+5. If `COHERE_API_KEY` isn't set, or anything above fails for any reason, the route falls back
+   to simple keyword matching over `Profile.facts` so the widget never breaks outright.
+
+```
+visitor question
+      │
+      ▼
+embed question (Cohere embed-english-v3.0)
+      │
+      ▼
+cosine similarity vs. stored KnowledgeChunks (resume, about page,
+certificates, projects, GitHub READMEs)
+      │
+      ▼
+top ~6 relevant chunks ──► Cohere chat (command-a-03-2025)
+                                  │
+                     needs live project detail?
+                          │              │
+                         yes             no
+                          │              │
+              get_github_repo_details    │
+              (live GitHub API call)     │
+                          │              │
+                          └──────┬───────┘
+                                 ▼
+                          final answer
+```
+
+### Setup
+
 1. Get a Cohere key at https://dashboard.cohere.com/api-keys (same one your LLM File Assistant
    project uses) and put it in `.env` as `COHERE_API_KEY=...`.
 2. Optionally set `GITHUB_USERNAME` (defaults to `Gayathri332`) and `GITHUB_TOKEN` (raises the
    GitHub API rate limit from 60/hour to 5000/hour — worth it once the site gets real traffic).
-3. Run `npm install` (pulls in the two new dependencies, `pdf-parse` and `cheerio`).
+3. Run `npm install` (pulls in `pdf-parse` and `cheerio`, used only by the build script).
 4. Run `npm run build-kb`. This connects to Mongo, reads everything above, calls Cohere's embed
    endpoint, and stores the result. It prints progress as it goes.
 5. Restart the server.
@@ -158,9 +218,9 @@ resume PDF into `public/assets/` with that exact filename, or edit the `href` in
 
 ## 7. Adding your real certificate files
 
-`npm run seed` loads 12 certificates (from `seed.js`) with titles guessed off your certificate
+`npm run seed` loads certificates (from `seed.js`) with titles guessed off your certificate
 folder — **double-check these, some are inferred and may be wrong.** Fix any of them the same
-way you'd fix a project (see #9 below), or just edit the `certificateSeedData` array in
+way you'd fix a project (see section 9), or just edit the `certificateSeedData` array in
 `seed.js` and re-run `npm run seed`.
 
 Each certificate looks for its image at a predictable path based on its title, so **you don't
@@ -222,6 +282,9 @@ curl -X PUT http://localhost:5000/api/certificates/CERT_ID \
   -d '{"title": "Corrected Title"}'
 ```
 
+Remember: after adding or changing a project or certificate, run `npm run build-kb` again so
+the "Ask about Gayathri" assistant knows about it too (section 5).
+
 ## 10. Read contact messages
 
 Messages submitted through the contact form are saved in MongoDB, in the `contacts`
@@ -232,62 +295,6 @@ curl http://localhost:5000/api/contact -H "x-admin-key: YOUR_ADMIN_KEY"
 ```
 
 Or just open the collection directly in MongoDB Atlas / Compass.
-
-## 11. Deploying
-
-This is one server (frontend + API together), so it deploys as a single Node app:
-
-- **Render / Railway / Fly.io**: connect the repo, set the same environment variables from
-  `.env`, build command `npm install`, start command `npm start`.
-- Point `ALLOWED_ORIGINS` in your deployed `.env` at your live URL once you have one — this
-  is a CORS allowlist that currently only permits `localhost`.
-- Point your domain (if you buy one) at whichever platform you deploy to.
-
-## Project structure
-
-```
-gayathri-portfolio/
-├── server.js              # Express app entry point
-├── seed.js                 # Seeds starter projects, certificates, and profile into MongoDB
-├── models/
-│   ├── Contact.js           # Contact message schema
-│   ├── Project.js           # Project schema
-│   ├── Certificate.js       # Certificate schema
-│   └── Profile.js           # Resume/about text + fallback facts for the chat widget
-├── routes/
-│   ├── contact.js           # POST /api/contact (public), GET (admin)
-│   ├── projects.js          # GET /api/projects (public), POST/PUT/DELETE (admin)
-│   ├── certificates.js      # GET /api/certificates (public), POST/PUT/DELETE (admin)
-│   ├── profile.js           # GET/PUT /api/profile (admin) — what the chat widget knows
-│   └── chat.js               # POST /api/chat — powers "Ask about Gayathri"
-└── public/
-    ├── index.html            # Main scrolling page (Hero → About → … → Contact)
-    ├── project.html           # One project, big, with prev/next
-    ├── certificates.html      # Every certificate, big, alternating left/right
-    ├── css/style.css
-    ├── js/
-    │   ├── main.js             # index.html behavior + card rendering
-    │   ├── project.js          # project.html rendering
-    │   ├── certificates.js     # certificates.html rendering
-    │   ├── projects-data.js    # project fallback data + slugify()
-    │   ├── certificates-data.js # certificate fallback data + placeholder seal art
-    │   └── cursor.js           # custom cursor
-    └── assets/
-        ├── profile1.jpg          # your photo
-        ├── Gayathri_Resume_2026S.pdf
-        └── certificates/        # certificate images/PDFs — see section 7
-```
-
-## Notes on choices made for you
-
-- **No phone number displayed publicly** — it's on your résumé but left off the live page to
-  cut down on spam calls. Easy to add back in `index.html` under `.contact__list` if you'd
-  rather have it visible.
-- **Honeypot + rate limiting** on the contact form to cut down on bot spam, since it's a public
-  POST endpoint.
-- **GitHub repo count is fetched live** client-side from the public GitHub API — LeetCode
-  doesn't have an open CORS-friendly API, so that section links out to your live profile
-  instead of faking a number that would go stale.
 
 ## 11. Deploying to Vercel
 
@@ -324,3 +331,71 @@ so the app is split accordingly:
 scripts. Run them locally with your `.env`'s `MONGODB_URI` pointed at the same Atlas cluster
 Vercel uses, and the data/knowledge base will be there the next time the site loads. Re-run
 `build-kb` any time content changes, same as before.
+
+**Deploying somewhere other than Vercel?** Render, Railway, and Fly.io all work fine too —
+connect the repo, set the same environment variables, build command `npm install`, start
+command `npm start` (they run `server.js` as a normal long-lived process, so `api/index.js`
+and `vercel.json` are simply unused). Either way, remember to update `ALLOWED_ORIGINS` to your
+live URL once you have one.
+
+## Project structure
+
+```
+gayathri-portfolio/
+├── app.js                  # Express app (middleware, routes, static) — no listen()/DB connect
+├── server.js                # Local dev entry point: connects to Mongo, then app.listen()
+├── vercel.json               # Routes /api/* to api/index.js on Vercel; static elsewhere
+├── seed.js                    # Seeds starter projects, certificates, and profile into MongoDB
+├── api/
+│   └── index.js               # Vercel serverless entry point (wraps app.js)
+├── lib/
+│   ├── db.js                   # Cached MongoDB connection (shared by server.js and api/index.js)
+│   ├── cohere.js                # Cohere embed + chat + cosine similarity helpers
+│   └── github.js                 # GitHub REST API helpers (list repos, get README)
+├── scripts/
+│   └── buildKnowledgeBase.js      # npm run build-kb — builds the assistant's knowledge base
+├── models/
+│   ├── Contact.js                  # Contact message schema
+│   ├── Project.js                   # Project schema
+│   ├── Certificate.js                # Certificate schema
+│   ├── Profile.js                     # Resume/about text + fallback facts for the chat widget
+│   └── KnowledgeChunk.js               # Embedded chunks used for semantic search (section 5)
+├── routes/
+│   ├── contact.js                       # POST /api/contact (public), GET (admin)
+│   ├── projects.js                       # GET /api/projects (public), POST/PUT/DELETE (admin)
+│   ├── certificates.js                    # GET /api/certificates (public), POST/PUT/DELETE (admin)
+│   ├── profile.js                          # GET/PUT /api/profile (admin) — what the fallback knows
+│   └── chat.js                              # POST /api/chat — powers "Ask about Gayathri" (section 5)
+└── public/
+    ├── index.html            # Main scrolling page (Hero → About → … → Contact)
+    ├── project.html           # One project, big, with prev/next
+    ├── certificates.html      # Every certificate, big, alternating left/right
+    ├── css/style.css
+    ├── js/
+    │   ├── main.js             # index.html behavior + card rendering
+    │   ├── project.js          # project.html rendering
+    │   ├── certificates.js     # certificates.html rendering
+    │   ├── projects-data.js    # project fallback data + slugify()
+    │   ├── certificates-data.js # certificate fallback data + placeholder seal art
+    │   └── cursor.js           # custom cursor
+    └── assets/
+        ├── profile.jpg          # your photo
+        ├── Gayathri_Resume_2026S.pdf
+        └── certificates/        # certificate images/PDFs — see section 7
+```
+
+## Notes on choices made for you
+
+- **No phone number displayed publicly** — it's on your résumé but left off the live page to
+  cut down on spam calls. Easy to add back in `index.html` under `.contact__list` if you'd
+  rather have it visible.
+- **Honeypot + rate limiting** on the contact form to cut down on bot spam, since it's a public
+  POST endpoint.
+- **GitHub repo count is fetched live** client-side from the public GitHub API — LeetCode
+  doesn't have an open CORS-friendly API, so that section links out to your live profile
+  instead of faking a number that would go stale.
+- **No dedicated vector database for the assistant** — with a handful of pages worth of content,
+  loading all chunks and computing cosine similarity in plain JavaScript is fast enough and
+  avoids adding a whole extra service (Pinecone, Chroma, etc.) just for this. If your content
+  ever grows to thousands of chunks, that's the point where a proper vector index would start
+  to matter.
