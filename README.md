@@ -95,6 +95,9 @@ This inserts the starter projects, certificates, and profile info into MongoDB. 
 arrays in `seed.js` any time and re-run `npm run seed` to reset them, or add new ones live
 (see section 9) once it's running.
 
+```bash
+npm run build-kb 
+```
 ## 4. Run it
 
 ```bash

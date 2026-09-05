@@ -26,7 +26,7 @@
 }
 
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; max-width: 100%; overflow-x: hidden; }
 
 body {
   margin: 0;
@@ -729,7 +729,7 @@ main { position: relative; }
   padding: 3px 8px; letter-spacing: 0.05em;
 }
 .project-card__body { padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
-.project-card__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.project-card__head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 8px 10px; }
 .project-card__head h3 { font-size: 0.98rem; }
 .project-card__badge {
   font-family: var(--font-mono); font-size: 0.62rem; padding: 3px 8px;
@@ -993,6 +993,11 @@ main { position: relative; }
 .contact__email-copy:hover { border-color: var(--accent); border-style: solid; transform: translateY(-2px); }
 .contact__email-copy-icon { display: inline-block; transition: transform 0.4s ease; }
 .contact__email-copy:hover .contact__email-copy-icon { transform: rotate(18deg); }
+.contact__email-copy-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
 .contact__email-copy-hint {
   opacity: 0.4; font-size: 0.74rem;
   transition: opacity 0.2s ease, color 0.2s ease;
@@ -1584,4 +1589,53 @@ button.about-photo { display: block; }
 
 @media (max-width: 1050px) and (min-width: 901px) {
   .project-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ---------------------------------------------------------
+   ADDITIONAL MOBILE RESPONSIVENESS FIXES
+   (small phones — tightens spacing/type-scale and fixes a few
+   flexbox overflow edge-cases the 900/780/640px breakpoints
+   above didn't reach)
+--------------------------------------------------------- */
+@media (max-width: 640px) {
+  /* Sheets carried a lot of unused vertical padding on short mobile
+     viewports; trimming this keeps content from feeling stranded. */
+  .sheet { padding-top: 64px; padding-bottom: 64px; }
+  .sheet__inner { padding-left: 18px; padding-right: 18px; }
+
+  /* Nav: give the hamburger/theme-toggle more breathing room and a
+     properly sized (44px) tap target. */
+  .nav { margin-left: 10px; margin-right: 10px; padding: 8px 8px 8px 12px; gap: 10px; }
+  .nav__brand-text { font-size: 0.92rem; }
+  .nav__toggle { padding: 10px 6px; }
+
+  /* Hero CTA row: full-width, stacked buttons are far easier to tap
+     accurately than a wrapped row of small buttons. */
+  .hero__actions { flex-direction: column; align-items: stretch; }
+  .hero__actions .btn { justify-content: center; text-align: center; }
+  .hero__links { display: flex; flex-wrap: wrap; gap: 4px 0; }
+
+  /* Status card: drop the side padding a touch and let long values
+     wrap onto their own line under the label instead of squeezing
+     both into one row. */
+  .status-card { padding: 18px; }
+  .status-card__list li { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .status-card__value { text-align: left; }
+
+  /* Hero video transport bar: shrink so all controls reliably fit
+     on a narrow phone without overflowing the pill. */
+  .hero-video__controls { gap: 8px; padding: 8px 12px; font-size: 0.72rem; }
+  .hero-video__btn { width: 22px; height: 22px; }
+
+  /* Chat widget: use nearly the full viewport width so the panel
+     never gets clipped on small phones. */
+  .chat-panel { width: calc(100vw - 20px); }
+  .chat-widget { right: 10px; bottom: 10px; }
+}
+
+@media (max-width: 400px) {
+  .hero__title { font-size: 2.3rem; }
+  .section__title { font-size: 1.5rem; }
+  .status-card { font-size: 0.78rem; }
+  .btn { padding: 12px 16px; font-size: 0.8rem; }
 }

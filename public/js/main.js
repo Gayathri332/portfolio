@@ -200,6 +200,40 @@ fetch('https://api.github.com/users/Gayathri332')
   });
 
 // -----------------------------------------------------------
+// Live LeetCode solved-count (unofficial community stats API —
+// LeetCode itself doesn't expose a public CORS-enabled endpoint,
+// so this uses alfa-leetcode-api, a community wrapper around the
+// same public profile data leetcode.com/u/<user> shows).
+// Falls back to a plain profile link if the API is slow/down.
+// -----------------------------------------------------------
+const leetcodeSolvedEl = document.getElementById('leetcodeSolved');
+const LEETCODE_USERNAME = 'Gaya3thri333';
+const LEETCODE_PROFILE_URL = `https://leetcode.com/u/${LEETCODE_USERNAME}/`;
+
+function leetcodeFallbackLink() {
+  leetcodeSolvedEl.innerHTML = `<a href="${LEETCODE_PROFILE_URL}" target="_blank" rel="noopener">view live profile →</a>`;
+}
+
+if (leetcodeSolvedEl) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 6000);
+  fetch(`https://alfa-leetcode-api.onrender.com/${LEETCODE_USERNAME}/solved`, { signal: controller.signal })
+    .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+    .then((data) => {
+      clearTimeout(timeout);
+      if (typeof data.solvedProblem === 'number') {
+        leetcodeSolvedEl.textContent = `${data.solvedProblem} solved`;
+      } else {
+        leetcodeFallbackLink();
+      }
+    })
+    .catch(() => {
+      clearTimeout(timeout);
+      leetcodeFallbackLink();
+    });
+}
+
+// -----------------------------------------------------------
 // Projects — fetched from /api/projects (MongoDB), with a static
 // fallback (window.FALLBACK_PROJECTS, from js/projects-data.js).
 // Each card is a placeholder image + copy; clicking opens
