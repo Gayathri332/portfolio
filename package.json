@@ -1,0 +1,28 @@
+{
+  "name": "gayathri-portfolio",
+  "version": "1.0.0",
+  "description": "Personal portfolio for Gayathri Shettigar, with an Express + MongoDB backend for contact messages and projects.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "seed": "node seed.js",
+    "build-kb": "node scripts/buildKnowledgeBase.js"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.4.0",
+    "helmet": "^7.1.0",
+    "mongoose": "^8.5.0",
+    "pdf-parse": "^1.1.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Projects — Gayathri Shettigar</title>
+<meta name="description" content="Every project Gayathri Shettigar has shipped, full size." />
+<link rel="icon" href="data:,">
+<script>
+  // Applied before CSS loads, so the toggle a visitor already chose
+  // takes effect instantly with no flash of the wrong theme.
+  (function () {
+    var t = localStorage.getItem('gd-theme');
+    if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body class="is-on-dark">
+
+<div class="bg-motif" aria-hidden="true">
+  <svg viewBox="0 0 200 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M92 318 C86 260 100 230 88 190 C78 158 60 150 58 118 C56 88 76 78 72 46 C69 22 78 10 96 2"
+          stroke="white" stroke-width="1.6" stroke-linecap="round"/>
+    <path d="M88 190 L48 190 L48 160" stroke="white" stroke-width="1.3" stroke-linecap="round"/>
+    <path d="M78 158 L118 158 L118 120" stroke="white" stroke-width="1.3" stroke-linecap="round"/>
+    <path d="M72 100 L36 100" stroke="white" stroke-width="1.3" stroke-linecap="round"/>
+    <path d="M74 60 L108 60 L108 30" stroke="white" stroke-width="1.3" stroke-linecap="round"/>
+    <path d="M60 118 C44 112 34 122 22 116" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
+    <circle cx="48" cy="160" r="4" stroke="white" stroke-width="1.3"/>
+    <circle cx="118" cy="120" r="4" stroke="white" stroke-width="1.3"/>
+    <circle cx="36" cy="100" r="3" fill="white"/>
+    <circle cx="108" cy="30" r="4" stroke="white" stroke-width="1.3"/>
+    <circle cx="22" cy="116" r="3" fill="white"/>
+    <circle cx="96" cy="2" r="3.5" fill="white"/>
+    <path d="M92 318 C110 306 116 282 100 264" stroke="white" stroke-width="1.1" opacity="0.6" stroke-linecap="round"/>
+  </svg>
+</div>
+
+<header class="nav" id="top">
+  <a class="nav__brand" href="index.html">
+    <span class="nav__brand-mark">
+      <img src="assets/profile1.jpeg" alt="Gayathri Shettigar" onerror="this.closest('.nav__brand-mark').classList.add('nav__brand-mark--fallback')">
+      <span class="nav__brand-mark-fallback">GS</span>
+    </span>
+    <span class="nav__brand-text">gayathri.dev</span>
+  </a>
+  <button type="button" class="theme-toggle" id="themeToggle" role="switch" aria-checked="false" aria-label="Toggle light and dark mode">
+    <span class="theme-toggle__icon theme-toggle__icon--sun" aria-hidden="true">&#9728;</span>
+    <span class="theme-toggle__track"><span class="theme-toggle__knob"></span></span>
+    <span class="theme-toggle__icon theme-toggle__icon--moon" aria-hidden="true">&#9789;</span>
+  </button>
+  <button class="nav__toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+  <nav class="nav__routes" id="navRoutes">
+    <a href="about.html">About</a>
+    <a href="index.html#experience">Experience</a>
+    <a href="index.html#skills">Skills</a>
+    <a href="projects.html">Projects</a>
+    <a href="certificates.html">Certifications</a>
+    <a href="index.html#contact" class="nav__cta"><span>Contact</span></a>
+  </nav>
+</header>
+
+<main class="cert-showcase about-page">
+  <div class="about-page__blob about-page__blob--1" aria-hidden="true"></div>
+  <div class="about-page__blob about-page__blob--2" aria-hidden="true"></div>
+  <div class="about-page__blob about-page__blob--3" aria-hidden="true"></div>
+  <span class="about-page__float about-page__float--1" aria-hidden="true">&#10022;</span>
+  <span class="about-page__float about-page__float--2" aria-hidden="true">&#9670;</span>
+  <span class="about-page__float about-page__float--3" aria-hidden="true">&#10022;</span>
+
+  <section class="cert-showcase__hero">
+    <a class="project-back" href="index.html#projects">&larr; Back to portfolio</a>
+    <p class="project-hero__eyebrow">GET /projects</p>
+    <h1>Things I've shipped</h1>
+    <p class="project-hero__subtitle" id="psCount">Loading&hellip;</p>
+  </section>
+
+  <div class="cert-showcase__list" id="projectShowcaseList"></div>
+</main>
+
+<footer class="footer">
+  <div class="footer__routes">
+    <a href="about.html">/about</a>
+    <a href="index.html#experience">/experience</a>
+    <a href="index.html#skills">/skills</a>
+    <a href="projects.html">/projects</a>
+    <a href="certificates.html">/certifications</a>
+    <a href="index.html#contact">/contact</a>
+  </div>
+  <p>&copy; <span id="year"></span> Gayathri Shettigar. Built with Node.js, Express &amp; MongoDB.</p>
+</footer>
+
+<script src="js/projects-data.js"></script>
+<script src="js/cursor.js"></script>
+<script src="js/projects-showcase.js"></script>
+<script src="js/theme.js"></script>
+</body>
+</html>

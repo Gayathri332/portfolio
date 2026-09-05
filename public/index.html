@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Gayathri Shettigar — Backend Engineer, building toward AI</title>
+<meta name="description" content="Portfolio of Gayathri Shettigar — backend engineer at Avery Dennison, training to become an AI engineer." />
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script>
+  // Applied before CSS loads, so the toggle a visitor already chose
+  // takes effect instantly with no flash of the wrong theme.
+  (function () {
+    var t = localStorage.getItem('gd-theme');
+    if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+  })();
+</script>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body class="is-on-dark">
+
+<div class="bg-motif" aria-hidden="true">
+  <svg viewBox="0 0 200 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M92 318 C86 260 100 230 88 190 C78 158 60 150 58 118 C56 88 76 78 72 46 C69 22 78 10 96 2"
+          stroke="white" stroke-width="1.6" stroke-linecap="round"/>
+    <path d="M88 190 L48 190 L48 160" stroke="white" stroke-width="1.3" stroke-linecap="round"/>
+    <path d="M78 158 L118 158 L118 120" stroke="white" stroke-width="1.3" stroke-linecap="round"/>
+    <path d="M72 100 L36 100" stroke="white" stroke-width="1.3" stroke-linecap="round"/>
+    <path d="M74 60 L108 60 L108 30" stroke="white" stroke-width="1.3" stroke-linecap="round"/>
+    <path d="M60 118 C44 112 34 122 22 116" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
+    <circle cx="48" cy="160" r="4" stroke="white" stroke-width="1.3"/>
+    <circle cx="118" cy="120" r="4" stroke="white" stroke-width="1.3"/>
+    <circle cx="36" cy="100" r="3" fill="white"/>
+    <circle cx="108" cy="30" r="4" stroke="white" stroke-width="1.3"/>
+    <circle cx="22" cy="116" r="3" fill="white"/>
+    <circle cx="96" cy="2" r="3.5" fill="white"/>
+    <path d="M92 318 C110 306 116 282 100 264" stroke="white" stroke-width="1.1" opacity="0.6" stroke-linecap="round"/>
+  </svg>
+</div>
+
+<header class="nav" id="top">
+  <a class="nav__brand" href="#top">
+    <span class="nav__brand-mark">
+      <img src="assets/profile1.jpeg" alt="Gayathri Shettigar" onerror="this.closest('.nav__brand-mark').classList.add('nav__brand-mark--fallback')">
+      <span class="nav__brand-mark-fallback">GS</span>
+    </span>
+    <span class="nav__brand-text">gayathri.dev</span>
+  </a>
+  <button type="button" class="theme-toggle" id="themeToggle" role="switch" aria-checked="false" aria-label="Toggle light and dark mode">
+    <span class="theme-toggle__icon theme-toggle__icon--sun" aria-hidden="true">&#9728;</span>
+    <span class="theme-toggle__track"><span class="theme-toggle__knob"></span></span>
+    <span class="theme-toggle__icon theme-toggle__icon--moon" aria-hidden="true">&#9789;</span>
+  </button>
+  <button class="nav__toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+  <nav class="nav__routes" id="navRoutes">
+    <a href="about.html">About</a>
+    <a href="#experience">Experience</a>
+    <a href="#skills">Skills</a>
+    <a href="projects.html">Projects</a>
+    <a href="certificates.html">Certifications</a>
+    <a href="#contact" class="nav__cta"><span>Contact</span></a>
+  </nav>
+</header>
+
+<main>
+
+  <!-- HERO — white, sits at the very bottom of the stack -->
+  <section class="sheet sheet--dark hero--video" id="home" style="--i:0">
+    <div class="hero-video" id="heroVideo">
+      <video id="heroVideoEl" autoplay muted loop playsinline preload="auto" poster="assets/about-2.jpeg">
+        <source src="assets/hero-video.mp4" type="video/mp4">
+      </video>
+      <div class="hero-video__scrim" aria-hidden="true"></div>
+      <div class="hero-video__controls">
+        <button type="button" id="heroVideoPlay" class="hero-video__btn" aria-label="Pause video" aria-pressed="true">
+          <svg class="icon-pause" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="3" y="2" width="3.4" height="12"/><rect x="9.6" y="2" width="3.4" height="12"/></svg>
+          <svg class="icon-play" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" hidden><path d="M4 2.3v11.4c0 .7.77 1.13 1.36.76l9.2-5.7a.9.9 0 0 0 0-1.52l-9.2-5.7C4.77 1.17 4 1.6 4 2.3z"/></svg>
+        </button>
+        <span class="hero-video__time" id="heroVideoTime">0:00</span>
+        <button type="button" id="heroVideoSpeed" class="hero-video__btn hero-video__btn--text" aria-label="Change playback speed">1x</button>
+        <button type="button" id="heroVideoMute" class="hero-video__btn" aria-label="Unmute video" aria-pressed="true">
+          <svg class="icon-muted" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M2 6h2.4L8 3.2v9.6L4.4 10H2V6z" fill="currentColor"/>
+            <path d="M10.2 5.4l3.6 5.2M13.8 5.4l-3.6 5.2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+          </svg>
+          <svg class="icon-unmuted" viewBox="0 0 16 16" fill="none" aria-hidden="true" hidden>
+            <path d="M2 6h2.4L8 3.2v9.6L4.4 10H2V6z" fill="currentColor"/>
+            <path d="M10.6 5.4a4 4 0 0 1 0 5.2M12.6 3.6a7 7 0 0 1 0 8.8" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" fill="none"/>
+          </svg>
+        </button>
+        <button type="button" id="heroVideoFullscreen" class="hero-video__btn" aria-label="View fullscreen">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M1 5V1h4M11 1h4v4M15 11v4h-4M5 15H1v-4"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="sheet__inner hero">
+      <div class="hero__copy reveal">
+        <p class="eyebrow">Udupi · Karnataka, India</p>
+        <h1 class="hero__title">Gayathri Shettigar</h1>
+        <p class="hero__role">
+          <span id="typedRole">Backend Engineer</span><span class="cursor" aria-hidden="true">_</span>
+        </p>
+        <p class="hero__desc">
+          I build backend services and automation that hold up under real traffic — and I'm
+          deliberately pointed at AI engineering next: agents, tool-calling LLMs, and retrieval
+          systems, learned the same way I learned backend — by shipping.
+        </p>
+        <div class="hero__actions">
+          <a href="#contact" class="btn btn--primary">POST /contact</a>
+          <a href="#projects" class="btn btn--ghost">View projects</a>
+          <a href="assets/Gayathri_Resume_2026S.pdf" class="btn btn--text" download>Download résumé ↓</a>
+        </div>
+        <div class="hero__links">
+          <a href="https://github.com/Gayathri332" target="_blank" rel="noopener">GitHub</a>
+          <span class="dot">·</span>
+          <a href="https://leetcode.com/u/Gaya3thri333/" target="_blank" rel="noopener">LeetCode</a>
+          <span class="dot">·</span>
+          <a href="https://linkedin.com/in/gayathri3213" target="_blank" rel="noopener">LinkedIn</a>
+          <span class="dot">·</span>
+          <a href="mailto:gayathri3.offical@gmail.com">Email</a>
+        </div>
+      </div>
+
+      <aside class="status-card reveal" aria-label="System status">
+        <div class="status-card__head">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span>SYSTEM STATUS</span>
+          <span class="status-code">200 OK</span>
+        </div>
+        <ul class="status-card__list">
+          <li><span class="status-card__label">availability</span><span class="status-card__value">open to AI engineering roles</span></li>
+          <li><span class="status-card__label">current_role</span><span class="status-card__value">Automation Developer @ Avery Dennison</span></li>
+          <li><span class="status-card__label">uptime_since</span><span class="status-card__value">Oct 2025</span></li>
+          <li><span class="status-card__label">github.public_repos</span><span class="status-card__value" id="ghRepoCount">fetching…</span></li>
+          <li><span class="status-card__label">leetcode</span><span class="status-card__value"><a href="https://leetcode.com/u/Gaya3thri333/" target="_blank" rel="noopener">view live profile →</a></span></li>
+          <li><span class="status-card__label">currently_learning</span><span class="status-card__value">LLM agents, RAG, vector search</span></li>
+        </ul>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ABOUT — first black sheet -->
+  <section class="sheet sheet--dark" id="about" style="--i:1">
+    <div class="sheet__inner">
+      <p class="sheet__index">01 / About — GET /about</p>
+      <div class="section__head">
+        <h2 class="section__title">A backend engineer who reads the logs before she blames the code.</h2>
+        <a href="about.html" class="section__all">More about me →</a>
+      </div>
+      <div class="about__grid">
+        <div class="avatar avatar--about reveal" id="aboutAvatar">
+          <img src="assets/profile.jpeg" alt="Gayathri Shettigar" onerror="this.closest('.avatar').classList.add('avatar--fallback')">
+          <span class="avatar__fallback-text">GS</span>
+        </div>
+        <p class="about__lead reveal">
+          I'm a Computer &amp; Communication Engineering graduate (NMAM Institute of Technology, CGPA 8.75)
+          working as an Automation Developer at Avery Dennison, where I design workflows that remove manual
+          steps from enterprise processes and debug the ones that break in production. Before that I spent
+          five months as a Backend Developer Intern building JWT/OAuth-secured REST services in Node.js and
+          Express. Outside of work I solve DSA problems on LeetCode most days, and I'm currently taking
+          Airtribe's backend engineering course while pointing my next projects at AI: retrieval, embeddings,
+          and LLM tool-use.
+        </p>
+        <dl class="about__facts reveal">
+          <div><dt>Base</dt><dd>Udupi, Karnataka, India</dd></div>
+          <div><dt>Education</dt><dd>BE, Computer &amp; Communication Engg — CGPA 8.75</dd></div>
+          <div><dt>Now building</dt><dd>An LLM tool-calling agent + backend fundamentals via Airtribe</dd></div>
+          <div><dt>Next chapter</dt><dd>AI Engineer</dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXPERIENCE -->
+  <section class="sheet sheet--light" id="experience" style="--i:2">
+    <div class="sheet__inner">
+      <p class="sheet__index">02 / Experience — GET /experience</p>
+      <h2 class="section__title">Deployment log</h2>
+      <ol class="log">
+        <li class="log__entry reveal">
+          <div class="log__meta">
+            <span class="log__date">Oct 2025 — present</span>
+            <span class="log__tag log__tag--active">active</span>
+          </div>
+          <h3 class="log__role">Automation Developer <span class="log__org">— Avery Dennison</span></h3>
+          <ul class="log__points">
+            <li>Design and build automation that removes manual steps from enterprise workflows.</li>
+            <li>Investigate production issues end to end: root-cause analysis, then a fix meant to last.</li>
+            <li>Ship reliability improvements every sprint, working cross-functionally in an Agile team.</li>
+          </ul>
+        </li>
+        <li class="log__entry reveal">
+          <div class="log__meta">
+            <span class="log__date">Jan 2025 — May 2025</span>
+            <span class="log__tag">internship</span>
+          </div>
+          <h3 class="log__role">Backend Developer Intern <span class="log__org">— Exelon Circuits Pvt. Ltd.</span></h3>
+          <ul class="log__points">
+            <li>Built and maintained REST services with Node.js, Express, MongoDB, and TypeScript.</li>
+            <li>Implemented JWT and OAuth authentication, tightening data security across the app.</li>
+            <li>Wrote and automated test cases, cutting deployment defects and improving release quality.</li>
+          </ul>
+        </li>
+        <li class="log__entry reveal">
+          <div class="log__meta">
+            <span class="log__date">Feb 2023 — Mar 2023</span>
+            <span class="log__tag">research</span>
+          </div>
+          <h3 class="log__role">Cyber Security Tools for Ethical Hacking <span class="log__org">— MIT Manipal</span></h3>
+          <ul class="log__points">
+            <li>Ran vulnerability scans and penetration tests with Nmap, Metasploit, and Veil.</li>
+            <li>Practiced system hardening, intrusion detection, and secure development habits.</li>
+          </ul>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- SKILLS -->
+  <section class="sheet sheet--dark" id="skills" style="--i:3">
+    <div class="sheet__inner">
+      <p class="sheet__index">03 / Skills — GET /skills</p>
+      <h2 class="section__title">The stack</h2>
+      <div class="stack-grid">
+        <div class="stack-group reveal">
+          <h3>Languages</h3>
+          <div class="tags"><span>Java</span><span>C++</span><span>Python</span><span>JavaScript</span><span>TypeScript</span><span>SQL</span></div>
+        </div>
+        <div class="stack-group reveal">
+          <h3>Backend &amp; systems</h3>
+          <div class="tags"><span>Node.js</span><span>Express</span><span>REST APIs</span><span>MongoDB</span><span>Firebase</span><span>JWT</span><span>OAuth</span><span>WebSockets</span></div>
+        </div>
+        <div class="stack-group reveal">
+          <h3>DevOps &amp; tools</h3>
+          <div class="tags"><span>Git</span><span>CI/CD basics</span><span>Postman</span><span>Swagger</span><span>AWS (EC2, S3)</span></div>
+        </div>
+        <div class="stack-group reveal">
+          <h3>Core CS</h3>
+          <div class="tags"><span>Data Structures &amp; Algorithms</span><span>OOD</span><span>Multithreading</span><span>Networking</span><span>OS</span><span>DBMS</span></div>
+        </div>
+        <div class="stack-group stack-group--learning reveal">
+          <h3>Currently learning <span class="pulse-dot" aria-hidden="true"></span></h3>
+          <div class="tags"><span>LLM tool use / agents</span><span>Cohere API</span><span>RAG</span><span>Vector search (FAISS)</span><span>Sentence embeddings</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section class="sheet sheet--light" id="projects" style="--i:4">
+    <div class="sheet__inner">
+      <p class="sheet__index">04 / Projects — GET /projects</p>
+      <div class="section__head">
+        <h2 class="section__title">Things I've shipped</h2>
+        <a href="projects.html" class="section__all">See all, full size →</a>
+      </div>
+      <p class="section__note">Pulled live from MongoDB — click any card to open it.</p>
+      <div class="project-grid" id="projectGrid">
+        <!-- populated by js/main.js -->
+      </div>
+    </div>
+  </section>
+
+  <!-- CERTIFICATIONS -->
+  <section class="sheet sheet--dark" id="certifications" style="--i:5">
+    <div class="sheet__inner">
+      <p class="sheet__index">05 / Certifications — GET /certifications</p>
+      <div class="section__head">
+        <h2 class="section__title">Certifications &amp; recognition</h2>
+        <a href="certificates.html" class="section__all">See all, full size →</a>
+      </div>
+      <div class="cert-grid" id="certGrid"></div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <!-- CONTACT -->
+  <section class="sheet sheet--light section--contact" id="contact" style="--i:6">
+    <div class="sheet__inner">
+      <p class="sheet__index">06 / Contact — POST /contact</p>
+
+      <div class="contact__grid">
+        
+        <!-- LEFT COLUMN: Headline, Text, Buttons, Socials -->
+        <div class="contact__left-column">
+          
+          <div class="contact__hero reveal">
+            <span class="contact__badge"><span class="contact__badge-dot" aria-hidden="true"></span>open to opportunities</span>
+
+            <div class="contact__headline-row">
+              <h2 class="section__title contact__headline">Hiring? <span class="contact__headline-accent">let's talk.</span></h2>
+            </div>
+            
+            <p class="contact__subline">Not hiring? Let's still talk — I've got debugging stories that don't sleep.</p>
+
+            <div class="contact__hero-actions">
+              <button type="button" class="btn btn--glow contact__cta" id="contactCta">
+                <span class="contact__cta-icon" aria-hidden="true">💡</span>
+                Let's build something cool
+                <span class="contact__cta-arrow" aria-hidden="true">→</span>
+              </button>
+
+              <button type="button" class="contact__email-copy" id="emailCopy" data-email="gayathri3.offical@gmail.com">
+                <span class="contact__email-copy-icon" aria-hidden="true">👋</span>
+                <span class="contact__email-copy-text">gayathri3.offical@gmail.com</span>
+                <span class="contact__email-copy-hint" id="emailCopyHint">click to copy</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="contact__info reveal">
+            <p>
+              Open to AI engineering roles, backend roles, and interesting collaborations.
+              The fastest way to reach me is the form — it's saved straight to my inbox database,
+              not routed through anything else.
+            </p>
+
+            <div class="social-row">
+              <a class="social-chip social-chip--github" href="https://github.com/Gayathri332" target="_blank" rel="noopener" aria-label="GitHub">
+                <span class="social-chip__icon">
+                  <svg viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+                </span>
+                <span class="social-chip__label">GitHub</span>
+              </a>
+              <a class="social-chip social-chip--linkedin" href="https://linkedin.com/in/gayathri3213" target="_blank" rel="noopener" aria-label="LinkedIn">
+                <span class="social-chip__icon">
+                  <svg viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M0 1.146C0 .513.526 0 1.175 0h13.65C15.474 0 16 .513 16 1.146v13.708c0 .633-.526 1.146-1.175 1.146H1.175C.526 16 0 15.487 0 14.854V1.146zm4.943 12.248V6.169H2.542v7.225h2.401zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248-.822 0-1.359.54-1.359 1.248 0 .694.521 1.248 1.327 1.248h.016zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016l.016-.025V6.169h-2.4c.03.678 0 7.225 0 7.225h2.4z"/></svg>
+                </span>
+                <span class="social-chip__label">LinkedIn</span>
+              </a>
+              <a class="social-chip social-chip--leetcode" href="https://leetcode.com/u/Gaya3thri333/" target="_blank" rel="noopener" aria-label="LeetCode">
+                <span class="social-chip__icon">
+                  <svg viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10.478 1.647a.5.5 0 1 0-.956-.294l-4 13a.5.5 0 0 0 .956.294l4-13zM4.854 4.146a.5.5 0 0 1 0 .708L1.707 8l3.147 3.146a.5.5 0 0 1-.708.708l-3.5-3.5a.5.5 0 0 1 0-.708l3.5-3.5a.5.5 0 0 1 .708 0zm6.292 0a.5.5 0 0 0 0 .708L14.293 8l-3.147 3.146a.5.5 0 0 0 .708.708l3.5-3.5a.5.5 0 0 0 0-.708l-3.5-3.5a.5.5 0 0 0-.708 0z"/></svg>
+                </span>
+                <span class="social-chip__label">LeetCode</span>
+              </a>
+              <a class="social-chip social-chip--instagram" href="https://www.instagram.com/escaped.exe" target="_blank" rel="noopener" aria-label="Instagram">
+                <span class="social-chip__icon">
+                  <svg viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M8 0C5.829 0 5.556.01 4.703.048 3.85.088 3.269.222 2.76.42a3.917 3.917 0 0 0-1.417.923A3.927 3.927 0 0 0 .42 2.76C.222 3.268.087 3.85.048 4.7.01 5.555 0 5.827 0 8.001c0 2.172.01 2.444.048 3.297.04.852.174 1.433.372 1.942.205.526.478.972.923 1.417.444.445.89.719 1.416.923.51.198 1.09.333 1.942.372C5.555 15.99 5.827 16 8 16s2.444-.01 3.298-.048c.851-.04 1.434-.174 1.943-.372a3.916 3.916 0 0 0 1.416-.923c.445-.445.718-.891.923-1.417.197-.509.332-1.09.372-1.942C15.99 10.445 16 10.173 16 8s-.01-2.445-.048-3.299c-.04-.851-.175-1.433-.372-1.941a3.926 3.926 0 0 0-.923-1.417A3.911 3.911 0 0 0 13.24.42c-.51-.198-1.092-.333-1.943-.372C10.443.01 10.172 0 7.998 0h.003zm-.717 1.442h.718c2.136 0 2.389.007 3.232.046.78.035 1.204.166 1.486.275.373.145.64.319.92.599.28.28.453.546.598.92.11.281.24.705.275 1.485.039.843.047 1.096.047 3.231s-.008 2.389-.047 3.232c-.035.78-.166 1.203-.275 1.485a2.47 2.47 0 0 1-.599.919c-.28.28-.546.453-.92.598-.28.11-.704.24-1.485.276-.843.038-1.096.047-3.232.047s-2.39-.009-3.233-.047c-.78-.036-1.203-.166-1.485-.276a2.478 2.478 0 0 1-.92-.598 2.48 2.48 0 0 1-.6-.92c-.109-.281-.24-.705-.275-1.485-.038-.843-.046-1.096-.046-3.233 0-2.136.008-2.388.046-3.231.036-.78.166-1.204.276-1.486.145-.373.319-.64.599-.92.28-.28.546-.453.92-.598.282-.11.705-.24 1.485-.276.738-.034 1.024-.044 2.515-.045v.002zm4.988 1.328a.96.96 0 1 0 0 1.92.96.96 0 0 0 0-1.92zm-4.27 1.122a4.109 4.109 0 1 0 0 8.217 4.109 4.109 0 0 0 0-8.217zm0 1.441a2.667 2.667 0 1 1 0 5.334 2.667 2.667 0 0 1 0-5.334z"/></svg>
+                </span>
+                <span class="social-chip__label">Instagram</span>
+              </a>
+            </div>
+
+            <p class="contact__location"><span aria-hidden="true">📍</span> Udupi, Karnataka, India</p>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN: FORM -->
+        <div class="contact__form-wrap reveal">
+          <form class="contact__form" id="contactForm" novalidate>
+            <div class="field">
+              <label for="name">Name</label>
+              <input type="text" id="name" name="name" autocomplete="name" required maxlength="100">
+            </div>
+            <div class="field">
+              <label for="email">Email</label>
+              <input type="email" id="email" name="email" autocomplete="email" required maxlength="150">
+            </div>
+            <div class="field">
+              <label for="message">Message</label>
+              <textarea id="message" name="message" rows="5" required maxlength="3000"></textarea>
+            </div>
+            <div class="field field--honeypot" aria-hidden="true">
+              <label for="website">Website</label>
+              <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+            </div>
+            <div class="contact__form-foot">
+              <button type="submit" class="btn btn--primary" id="contactSubmit">Send message</button>
+              <span class="contact__form-note">Usually reply within a couple of days.</span>
+            </div>
+            <p class="contact__status" id="contactStatus" role="status" aria-live="polite"></p>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="footer__routes">
+    <a href="about.html">/about</a>
+    <a href="#experience">/experience</a>
+    <a href="#skills">/skills</a>
+    <a href="projects.html">/projects</a>
+    <a href="certificates.html">/certifications</a>
+    <a href="#contact">/contact</a>
+  </div>
+  <p>© <span id="year"></span> Gayathri Shettigar. Built with Node.js, Express &amp; MongoDB.</p>
+</footer>
+
+<div class="chat-widget" id="chatWidget">
+  <div class="chat-panel" id="chatPanel" role="dialog" aria-label="Ask about Gayathri" aria-hidden="true">
+    <div class="chat-panel__head">
+      <div>
+        <p class="chat-panel__title">Ask about Gayathri</p>
+        <p class="chat-panel__sub">गायत्री के बारे में पूछें</p>
+      </div>
+      <button class="chat-panel__close" id="chatClose" aria-label="Close chat">✕</button>
+    </div>
+    <div class="chat-panel__messages" id="chatMessages">
+      <div class="chat-msg chat-msg--bot">
+        Hi! Ask me anything about Gayathri — her experience, skills, projects, education, or
+        how to reach her.
+      </div>
+    </div>
+    <form class="chat-panel__form" id="chatForm">
+      <input type="text" id="chatInput" placeholder="e.g. what is she building right now?" maxlength="500" autocomplete="off" />
+      <button type="submit" aria-label="Send">→</button>
+    </form>
+  </div>
+  <button class="chat-bubble" id="chatBubble" aria-label="Ask about Gayathri" aria-expanded="false">
+    <span class="chat-bubble__icon">💬</span>
+    <span class="chat-bubble__label">Ask about Gayathri</span>
+  </button>
+</div>
+
+<script src="js/projects-data.js"></script>
+<script src="js/certificates-data.js"></script>
+<script src="js/cursor.js"></script>
+<script src="js/main.js"></script>
+<script src="js/theme.js"></script>
+</body>
+</html>
