@@ -387,18 +387,3 @@ gayathri-portfolio/
         └── certificates/        # certificate images/PDFs — see section 7
 ```
 
-## Notes on choices made for you
-
-- **No phone number displayed publicly** — it's on your résumé but left off the live page to
-  cut down on spam calls. Easy to add back in `index.html` under `.contact__list` if you'd
-  rather have it visible.
-- **Honeypot + rate limiting** on the contact form to cut down on bot spam, since it's a public
-  POST endpoint.
-- **GitHub repo count is fetched live** client-side from the public GitHub API — LeetCode
-  doesn't have an open CORS-friendly API, so that section links out to your live profile
-  instead of faking a number that would go stale.
-- **No dedicated vector database for the assistant** — with a handful of pages worth of content,
-  loading all chunks and computing cosine similarity in plain JavaScript is fast enough and
-  avoids adding a whole extra service (Pinecone, Chroma, etc.) just for this. If your content
-  ever grows to thousands of chunks, that's the point where a proper vector index would start
-  to matter.
