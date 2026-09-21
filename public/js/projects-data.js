@@ -6,6 +6,16 @@
 // -----------------------------------------------------------
 window.FALLBACK_PROJECTS = [
   {
+  title: 'Agentic Profile Matching',
+  description:
+    'A LangGraph-based recruiting agent that parses job descriptions, searches and ranks resumes using a RAG retrieval layer, and explains ranking decisions with grounded resume evidence. It supports dynamic re-ranking, requirement conflict detection, requirement version history, skill-gap analysis, candidate comparison, interview-question generation, resume uploads, and human-in-the-loop approval.',
+  tech: ['Python', 'LangGraph', 'RAG', 'TF-IDF', 'Streamlit'],
+  tags: ['AI/LLM'],
+  githubUrl: 'https://github.com/Gayathri332/agentic-profile-matching',
+  status: 'live',
+  images: ['assets/projects/agentic.png'],
+},
+  {
     title: 'RAG Based Profile matching',
     description:
       "A hybrid RAG-based profile matching engine that matches candidate resumes against job descriptions using semantic retrieval with Sentence Transformers and lexical retrieval with BM25. It extracts candidate metadata such as skills, experience, education, and name, applies strict filtering, and ranks candidates with explainable match scores and relevant resume excerpts.",

@@ -529,20 +529,69 @@ chatForm.addEventListener('submit', async (e) => {
   const loadingEl = addChatMessage('Thinking…', 'bot');
   loadingEl.classList.add('chat-msg--loading');
 
+  let streamedAny = false;
+  let answerText = '';
+
   try {
-    const res = await fetch('/api/chat', {
+    const res = await fetch('/api/chat/stream', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ question }),
     });
-    const data = await res.json();
-    loadingEl.classList.remove('chat-msg--loading');
-    loadingEl.textContent = res.ok
-      ? data.answer
-      : data.error || "Couldn't get an answer just now — try again.";
+
+    // Non-stream error responses (bad request, rate limit) still come back
+    // as plain JSON with a normal content type.
+    if (!res.ok || !res.body || !(res.headers.get('content-type') || '').includes('text/event-stream')) {
+      const data = await res.json().catch(() => ({}));
+      loadingEl.classList.remove('chat-msg--loading');
+      loadingEl.textContent = data.answer || data.error || "Couldn't get an answer just now — try again.";
+      return;
+    }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+
+      const lines = buffer.split('\n');
+      buffer = lines.pop(); // keep trailing partial line for the next chunk
+
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed.startsWith('data:')) continue;
+        const payload = trimmed.slice(5).trim();
+        if (!payload || payload === '[DONE]') continue;
+
+        let parsed;
+        try {
+          parsed = JSON.parse(payload);
+        } catch {
+          continue;
+        }
+        if (!parsed.delta) continue;
+
+        if (!streamedAny) {
+          streamedAny = true;
+          loadingEl.classList.remove('chat-msg--loading');
+          loadingEl.textContent = '';
+        }
+        answerText += parsed.delta;
+        loadingEl.textContent = answerText;
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+    }
+
+    if (!streamedAny) {
+      loadingEl.classList.remove('chat-msg--loading');
+      loadingEl.textContent = "Couldn't get an answer just now — try again.";
+    }
   } catch (err) {
     loadingEl.classList.remove('chat-msg--loading');
-    loadingEl.textContent = "Couldn't reach the server — check that it's running.";
+    loadingEl.textContent = answerText || "Couldn't reach the server — check that it's running.";
   } finally {
     chatInput.disabled = false;
     chatInput.focus();

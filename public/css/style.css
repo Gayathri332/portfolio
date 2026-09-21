@@ -180,7 +180,7 @@ body.is-on-dark .nav {
   position: relative;
   white-space: nowrap;
   opacity: 0.68;
-  padding: 4px 1px 8px;
+  padding: 4px 8px 8px;
   transition: opacity 0.2s ease;
 }
 .nav__routes a::after {
@@ -553,7 +553,7 @@ main { position: relative; }
 .btn--primary:hover { transform: translateY(-2px); }
 .sheet--dark .btn--primary, .sheet--light .btn--primary { background: var(--white); color: var(--black); border-color: var(--white); }
 .btn--ghost:hover { transform: translateY(-2px); background: currentColor; color: var(--white); }
-.sheet--dark .btn--ghost:hover, .sheet--light .btn--ghost:hover { color: var(--black); }
+.sheet--dark .btn--ghost:hover, .sheet--light .btn--ghost:hover { background: var(--white); color: var(--black); }
 .btn--text { border-color: transparent; padding: 13px 4px; opacity: 0.65; }
 .btn--text:hover { opacity: 1; }
 

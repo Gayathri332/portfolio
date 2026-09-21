@@ -2,7 +2,7 @@ const express = require('express');
 const rateLimit = require('express-rate-limit');
 const Profile = require('../models/Profile');
 const KnowledgeChunk = require('../models/KnowledgeChunk');
-const { embed, cosineSimilarity, chat, chatText } = require('../lib/cohere');
+const { embed, cosineSimilarity, chat, chatStream, chatText } = require('../lib/cohere');
 const { listRepos, getReadme } = require('../lib/github');
 
 const router = express.Router();
@@ -148,10 +148,9 @@ async function runGithubTool(repoQuery) {
 // Main LLM answer path: retrieved context + tool access to GitHub.
 // ---------------------------------------------------------------------------
 
-async function answerWithRag(question) {
+async function buildSystemPrompt(question) {
   const context = await retrieveContext(question);
-
-  const systemPrompt =
+  return (
     'You are a friendly assistant answering visitor questions on Gayathri Shettigar\u2019s personal ' +
     'portfolio site, on her behalf. Speak about her in the third person and keep answers short ' +
     '(2-4 sentences) unless the question needs more detail. Answer using the CONTEXT below. If a ' +
@@ -159,7 +158,12 @@ async function answerWithRag(question) {
     'cover it, call get_github_repo_details to look it up before answering. If the answer still ' +
     "isn't available after that, say you don't have that detail and suggest the contact form " +
     'instead of guessing \u2014 never invent facts about her.\n\n--- CONTEXT ---\n' +
-    (context || '(no matching stored context for this question)');
+    (context || '(no matching stored context for this question)')
+  );
+}
+
+async function answerWithRag(question) {
+  const systemPrompt = await buildSystemPrompt(question);
 
   const messages = [
     { role: 'system', content: systemPrompt },
@@ -199,6 +203,51 @@ async function answerWithRag(question) {
     const text = chatText(message);
     if (text) return text;
     break;
+  }
+  return null;
+}
+
+// Streaming counterpart to answerWithRag: same retrieval + tool-calling loop,
+// but forwards each chunk of the final answer to onTextDelta as it's
+// generated instead of waiting for the whole response. Tool-call rounds
+// don't produce content-delta events, so nothing gets streamed until the
+// model is actually writing the answer \u2014 no partial/garbled output.
+async function answerWithRagStream(question, onTextDelta) {
+  const systemPrompt = await buildSystemPrompt(question);
+
+  const messages = [
+    { role: 'system', content: systemPrompt },
+    { role: 'user', content: question },
+  ];
+
+  for (let round = 0; round < 2; round++) {
+    const message = await chatStream(messages, { tools: [githubTool], onTextDelta });
+    if (!message) return null;
+
+    if (message.tool_calls.length) {
+      messages.push({
+        role: 'assistant',
+        tool_plan: message.tool_plan,
+        tool_calls: message.tool_calls,
+      });
+      for (const call of message.tool_calls) {
+        let args = {};
+        try {
+          args = JSON.parse(call.function?.arguments || '{}');
+        } catch {
+          // leave args empty; runGithubTool handles a blank query gracefully
+        }
+        const result = await runGithubTool(args.repo_query || question);
+        messages.push({
+          role: 'tool',
+          tool_call_id: call.id,
+          content: result,
+        });
+      }
+      continue; // go around again so the model can use the tool result
+    }
+
+    return message.content || null;
   }
   return null;
 }
@@ -255,6 +304,52 @@ router.post('/', chatLimiter, async (req, res) => {
     console.error('POST /api/chat failed:', err.message);
     res.status(500).json({ error: 'Something went wrong answering that. Try again.' });
   }
+});
+
+// POST /api/chat/stream — same contract as /api/chat, but streams the
+// answer over Server-Sent Events as it's generated instead of waiting for
+// the full response. Each event is `data: {"delta": "..."}`, terminated by
+// `data: [DONE]`.
+router.post('/stream', chatLimiter, async (req, res) => {
+  const question = (req.body.question || '').trim();
+  if (!question) return res.status(400).json({ error: 'Ask a question first.' });
+  if (question.length > 500) {
+    return res.status(400).json({ error: 'Keep the question under 500 characters.' });
+  }
+
+  const profile = await Profile.findOne();
+  if (!profile) {
+    return res.json({
+      answer: "Gayathri hasn't loaded her profile data yet \u2014 run `npm run seed` to set it up.",
+      source: 'none',
+    });
+  }
+
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache, no-transform',
+    Connection: 'keep-alive',
+    'X-Accel-Buffering': 'no', // disable proxy buffering (e.g. nginx) so chunks flush immediately
+  });
+  const send = (delta) => res.write(`data: ${JSON.stringify({ delta })}\n\n`);
+
+  try {
+    if (process.env.COHERE_API_KEY) {
+      const answer = await answerWithRagStream(question, send);
+      if (!answer) {
+        const fallback = answerFromFacts(question, profile.facts || []);
+        send(fallback);
+      }
+    } else {
+      const fallback = answerFromFacts(question, profile.facts || []);
+      send(fallback);
+    }
+  } catch (err) {
+    console.error('Streaming chat failed:', err.message);
+    send("Something went wrong finishing that answer \u2014 try again.");
+  }
+  res.write('data: [DONE]\n\n');
+  res.end();
 });
 
 module.exports = router;
